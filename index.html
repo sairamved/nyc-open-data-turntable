@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYC Open Data Turntable</title>
+<meta name="description" content="NYC Open Data datasets as records, with Help Desk questions on a disc underneath. Prototype for Data Through Design 2027.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sairamved.github.io/nyc-open-data-turntable/">
+<meta property="og:title" content="NYC Open Data Turntable">
+<meta property="og:description" content="NYC Open Data datasets as records, with Help Desk questions on a disc underneath. Prototype for Data Through Design 2027.">
+<meta property="og:image" content="https://sairamved.github.io/nyc-open-data-turntable/media/turntable.gif">
+<meta property="og:image:type" content="image/gif">
+<meta property="og:image:width" content="480">
+<meta property="og:image:height" content="480">
+<meta property="og:image" content="https://sairamved.github.io/nyc-open-data-turntable/media/turntable.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:video" content="https://sairamved.github.io/nyc-open-data-turntable/media/turntable.mp4">
+<meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="1080">
+<meta property="og:video:height" content="1080">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NYC Open Data Turntable">
+<meta name="twitter:image" content="https://sairamved.github.io/nyc-open-data-turntable/media/turntable.png">
+<style>
+  :root { --ink: #000; --paper: #fff; --soft: #555; --line: #ddd;
+          --mono: ui-monospace, "SF Mono", Menlo, monospace;
+          --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { font: 11px/1.4 var(--mono); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- shelf ---------- */
+  header { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+  h1 { font: 700 11px/1.4 var(--mono); letter-spacing: .04em; margin: 0; }
+  #sub { margin: 2px 0 6px; color: var(--soft); }
+  .sources { margin: 0; max-width: 110ch; }
+  .sources a { color: var(--ink); text-underline-offset: 2px; }
+  #steps { display: flex; flex-wrap: wrap; gap: 6px 0; list-style: none; margin: 10px 0 0; padding: 0; }
+  #steps li { display: flex; align-items: center; }
+  #steps li + li::before { content: "›"; color: var(--soft); padding: 0 6px; }
+  #steps button { background: var(--paper); border: 1px solid var(--ink); padding: 6px 10px; cursor: pointer; }
+  #steps button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  #steps .n { font-variant-numeric: tabular-nums; font-weight: 700; }
+  #shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 4px; padding: 12px 16px 96px; margin: 0; list-style: none; }
+  #shelf li { aspect-ratio: 1; }
+  .rec { width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; display: block; }
+  .rec img { width: 100%; height: 100%; display: block; }
+  @media (hover: hover) { .rec:hover img { opacity: .82; } }
+  #info { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 2; pointer-events: none; }
+  #info span { background: var(--paper); padding: 6px 10px; display: inline-block; max-width: 100%; box-sizing: border-box; min-height: 1.4em; }
+
+  /* ---------- player ---------- */
+  #player { position: fixed; inset: 0; z-index: 5; background: var(--paper); display: grid; grid-template-columns: minmax(0, 1fr) min(440px, 40vw); }
+  #player[hidden] { display: none; }
+  #stage { position: relative; min-width: 0; min-height: 0; }
+  #stage canvas { display: block; touch-action: none; }
+  #stage-top { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; gap: 8px; align-items: baseline; pointer-events: none; }
+  #stage-top > * { pointer-events: auto; }
+  #stage-top h2 { font: 700 11px/1.4 var(--mono); margin: 0; flex: 0 1 auto; margin-right: auto; text-wrap: balance; background: var(--paper); padding: 2px 6px; }
+  .nav button { background: var(--paper); border: 1px solid var(--ink); padding: 6px 10px; cursor: pointer; }
+  #dials { position: absolute; left: 16px; bottom: 16px; background: var(--paper); padding: 10px 12px; display: grid; grid-template-columns: max-content 140px 3.5em; gap: 6px 10px; align-items: center; }
+  #dials label { color: var(--soft); }
+  #dials input[type=range] { width: 140px; accent-color: var(--ink); }
+  #dials output { font-variant-numeric: tabular-nums; text-align: right; }
+  #dials .row { grid-column: 1 / -1; display: flex; gap: 8px; }
+  #dials .row button { background: var(--paper); border: 1px solid var(--ink); padding: 6px 10px; cursor: pointer; }
+  #dials .row button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  #hint { position: absolute; left: 16px; top: 40px; margin: 0; color: var(--soft); background: var(--paper); padding: 2px 6px; }
+
+  #panel { border-left: 1px solid var(--ink); overflow-y: auto; overscroll-behavior: contain; padding: 18px 24px 48px; font: 13px/1.5 var(--sans); }
+  .kicker { font: 700 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+  #panel h3 { font: 700 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 28px 0 4px; }
+  #p-title { font: 600 19px/1.25 var(--sans); margin: 0 0 14px; text-wrap: balance; }
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0 0 14px; font: 12px/1.45 var(--mono); }
+  .facts dt { color: var(--soft); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+  #panel a { color: var(--ink); text-underline-offset: 2px; }
+  .summary { font: 12px/1.45 var(--mono); margin: 0 0 8px; }
+  article { padding: 16px 0 18px; border-top: 1px solid var(--ink); scroll-margin-top: 12px; }
+  article.current { box-shadow: inset 4px 0 0 var(--ink); padding-left: 14px; }
+  .thead { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font: 11px/1.4 var(--mono); margin-bottom: 10px; }
+  .thead .kind { font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+  .thead button { background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; font: inherit; }
+  .from { font: 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); margin: 0 0 4px; }
+  .msg { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 14px; font-size: 14px; line-height: 1.55; }
+  .reply { border-left: 2px solid var(--ink); padding-left: 12px; } .reply .msg { margin-bottom: 0; }
+  .none { font-style: italic; color: var(--soft); margin: 0; }
+  #close { background: var(--paper); border: 1px solid var(--ink); padding: 6px 10px; cursor: pointer; }
+  @media (prefers-reduced-motion: no-preference) { #close, .nav button, #steps button, #dials button { transition: scale 150ms ease-out; } }
+  #close:active, .nav button:active, #steps button:active, #dials button:active { scale: .96; }
+
+  @media (max-width: 760px) {
+    #player { grid-template-columns: 1fr; grid-template-rows: min(100vw, 62vh) 1fr; }
+    #panel { border-left: 0; border-top: 1px solid var(--ink); }
+    #dials, #hint { display: none; }
+    #stage-top { flex-wrap: wrap; }
+    #stage-top h2 { flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>NYC Open Data Turntable</h1>
+  <p id="sub"></p>
+  <p class="sources">Data:
+    <a href="https://data.cityofnewyork.us/City-Government/Local-Law-251-of-2017-Published-Data-Asset-Invento/5tqd-u88y/about_data">Local Law 251 of 2017: Published Data Asset Inventory</a> ·
+    <a href="https://data.cityofnewyork.us/City-Government/NYC-Open-Data-Release-Tracker/qj2z-ibhs/about_data">NYC Open Data Release Tracker</a> ·
+    <a href="https://data.cityofnewyork.us/City-Government/NYC-Open-Data-Help-Desk-Data-Questions-and-Reporte/r67x-e97r/about_data">NYC Open Data Help Desk: Data Questions and Reported Errors</a></p>
+  <ol id="steps" aria-label="Filter steps, in order; each keeps what passed the ones before it"></ol>
+</header>
+<main>
+  <ul id="shelf" aria-label="Datasets, oldest first"></ul>
+</main>
+<p id="info" aria-hidden="true"><span></span></p>
+<p class="sr-only" id="status" role="status"></p>
+
+<section id="player" hidden aria-labelledby="stage-title" role="dialog" aria-modal="true">
+  <div id="stage">
+    <div id="stage-top">
+      <h2 id="stage-title"></h2>
+      <span class="nav"><button type="button" id="prev" aria-label="Previous record">←</button> <button type="button" id="next" aria-label="Next record">→</button> <button type="button" id="close">Close <span aria-hidden="true">×</span></button></span>
+    </div>
+    <div id="dials" aria-label="Record controls" role="group">
+      <label for="d-rot">Angle</label><input id="d-rot" type="range" min="-180" max="180" step="0.1" value="0"><output for="d-rot" id="o-rot">0°</output>
+      <label for="d-drift">Speed</label><input id="d-drift" type="range" min="0" max="180" step="1" value="12"><output for="d-drift" id="o-drift">12°/s</output>
+      <label for="d-hole">Punch size</label><input id="d-hole" type="range" min="0.4" max="2" step="0.05" value="1"><output for="d-hole" id="o-hole">1.00</output>
+      <div class="row"><button type="button" data-view="both" aria-pressed="true">Both</button><button type="button" data-view="record" aria-pressed="false">Record</button><button type="button" data-view="film" aria-pressed="false">Help desk</button><button type="button" id="d-reset">Reset</button></div>
+    </div>
+    <p id="hint" aria-hidden="true">← → other records · esc close</p>
+  </div>
+  <aside id="panel" aria-label="Dataset details and help desk emails"><div id="p-body"></div></aside>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script type="module" src="records.js?v=2"></script>
+</body>
+</html>
